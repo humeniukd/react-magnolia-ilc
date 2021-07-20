@@ -50,7 +50,7 @@ function Navigation({ location }) {
           </NavLink>
         );
       })}
-      {renderLanguages(location.pathname)}
+      {/*{renderLanguages(location.pathname)}*/}
     </nav>
   ) : (
     <div />

@@ -1,10 +1,10 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route, StaticRouter } from 'react-router-dom';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import PageLoader from './helpers/PageLoader';
 import Navigation from './components/Navigation';
-import { getRouterBasename, isBrowser } from './helpers/AppHelpers';
+import { getRouterBasename } from './helpers/AppHelpers';
 
-function App({ location }) {
+function App() {
     const RootChildren = ({ location }) => (
         <>
             <header>
@@ -25,17 +25,10 @@ function App({ location }) {
         </>
     );
 
-    if (isBrowser()) {
-        return (
-            <BrowserRouter basename={getRouterBasename(window.location)}>
-                <RootChildren location={window.location}/>
-            </BrowserRouter>
-        );
-    }
     return (
-        <StaticRouter basename={getRouterBasename(location)}>
-            <RootChildren location={location} />
-        </StaticRouter>
+        <BrowserRouter basename={getRouterBasename(window.location)}>
+            <RootChildren location={window.location}/>
+        </BrowserRouter>
     );
 }
 

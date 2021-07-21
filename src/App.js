@@ -1,19 +1,23 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
-import PageLoader from './helpers/PageLoader';
+import { BrowserRouter, Switch, Route, StaticRouter } from 'react-router-dom';
+import PageLoader from './components/PageLoader';
 import Navigation from './components/Navigation';
-import { getRouterBasename } from './helpers/AppHelpers';
+import { getRouterBasename, isBrowser } from './helpers';
 
-function App() {
-    const RootChildren = ({ location }) => (
+function App({ location = window.location, pageJson, navJson }) {
+    const RootChildren = () => (
         <>
             <header>
-                <Navigation location={location} />
+                <Navigation items={navJson} />
             </header>
 
             <div className="container">
                 <Switch>
-                    <Route path="/" render={props => <PageLoader location={location} {...props} />} />
+                    <Route path="/" render={props => <PageLoader
+                        pageJson={pageJson}
+                        location={location}
+                        {...props}
+                    />} />
                 </Switch>
             </div>
 
@@ -25,11 +29,15 @@ function App() {
         </>
     );
 
-    return (
-        <BrowserRouter basename={getRouterBasename(window.location)}>
-            <RootChildren location={window.location}/>
+    return isBrowser() ? (
+        <BrowserRouter basename={getRouterBasename(location)}>
+            <RootChildren />
         </BrowserRouter>
-    );
+    ) : (
+        <StaticRouter basename={getRouterBasename(location)}>
+            <RootChildren />
+        </StaticRouter>
+    )
 }
 
 export default App;

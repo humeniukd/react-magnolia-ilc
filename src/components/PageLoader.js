@@ -1,51 +1,27 @@
 import React from 'react';
 import config from '../magnolia.config';
-import { getAPIBase, getLanguages, removeCurrentLanguage, getCurrentLanguage, getVersion } from './AppHelpers';
 
 import { EditablePage } from '@magnolia/react-editor';
 import { EditorContextHelper } from '@magnolia/react-editor';
-import axios from "axios";
+import {loadPage, loadTemplate} from "../api";
 
 class PageLoader extends React.Component {
   state = {};
-
-  getPagePath = () => {
-    const languages = getLanguages();
-    const nodeName = REACT_APP_MGNL_APP_BASE;
-    const currentLanguage = getCurrentLanguage(this.props.location.pathname); //TODO: props
-    let path = nodeName + this.props.location.pathname.replace(new RegExp('(.*' + nodeName + '|.html)', 'g'), ''); // remove .html
-
-    if (currentLanguage !== languages[0]) { // if not default
-      path = removeCurrentLanguage(path, currentLanguage);
-      path += '?lang=' + currentLanguage;
-    }
-
-    return path;
-  };
 
   loadPage = async () => {
     // Bail out if already loaded content.
     if (this.state.pathname === this.props.location.pathname) return;
 
-    const apiBase = getAPIBase();
+    const isInEditor = EditorContextHelper.inEditor();
 
-    const pagePath = this.getPagePath();
-    console.log('pagePath:' + pagePath);
-
-    const version = getVersion(this.props.location.href);
-    let fullContentPath = `${apiBase}${version ? REACT_APP_MGNL_API_PAGES_PREVIEW : REACT_APP_MGNL_API_PAGES}${pagePath}${version ? `?version=${version}` : ''}`;
-
-    const  { data: pageJson } = await axios.get(fullContentPath);
-
-    console.log('page content: ', pageJson);
+    const pageJson = await loadPage(this.props.location);
 
     const templateId = pageJson['mgnl:template'];
     console.log('templateId:', templateId);
 
     let templateJson = null;
-    if (EditorContextHelper.inEditor()) {
-      templateJson = await axios.get(apiBase + REACT_APP_MGNL_API_TEMPLATES + '/' + templateId);
-      console.log('definition:', templateJson);
+    if (isInEditor) {
+      templateJson = await loadTemplate(templateId)
     }
 
     this.setState({
@@ -56,6 +32,7 @@ class PageLoader extends React.Component {
     });
   };
 
+
   inEditorPreview() {
     const url = this.props.location.href;
     const inPreview = url.indexOf('mgnlPreview=true') > 0;
@@ -64,7 +41,14 @@ class PageLoader extends React.Component {
   }
 
   componentDidMount() {
-    this.loadPage();
+    if (this.props.pageJson) {
+      this.setState({
+        init: true,
+        content: this.props.pageJson,
+        templateDefinitions: this.props.templateJson,
+        pathname: this.props.location.pathname,
+      });
+    } else this.loadPage();
   }
 
   componentDidUpdate() {

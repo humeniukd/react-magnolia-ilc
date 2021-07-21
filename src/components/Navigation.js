@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { getAPIBase, getLanguages, getCurrentLanguage, changeLanguage } from '../helpers/AppHelpers';
-import axios from "axios";
+import { getLanguages, getCurrentLanguage, changeLanguage } from '../helpers';
+import { fetchNav } from "../api";
 
 function renderLanguages(pathname) {
   const currentLanguage = getCurrentLanguage(pathname);
@@ -17,25 +17,18 @@ function renderLanguages(pathname) {
   );
 }
 
-function Navigation({ location }) {
-  const [navItems, setNavItems] = React.useState([]);
+function Navigation({ items }) {
+  const [navItems, setNavItems] = useState(items || []);
 
-  React.useEffect(() => {
-    async function fetchNav() {
-      const apiBase = getAPIBase();
-      const url = apiBase + REACT_APP_MGNL_API_NAV + REACT_APP_MGNL_APP_BASE;
-      console.log('NAV URL:' + url);
-      const { data } = await axios.get(url);
-      let items = data['@nodes'].map((nodeName) => {
-        return data[nodeName];
-      });
-      setNavItems([data, ...items]);
+  useEffect(() => {
+    async function fetchData() {
+      const data = await fetchNav()
+      setNavItems(data)
     }
-
     if (navItems.length < 1) {
-      fetchNav();
+      fetchData();
     }
-  }, [navItems]);
+  }, []);
 
   return navItems ? (
     <nav className="Navigation">

@@ -69,3 +69,17 @@ export function getVersion(path) {
 export function isBrowser() {
   return typeof window !== "undefined";
 }
+
+export function getPagePath(location) {
+  const languages = getLanguages();
+  const nodeName = REACT_APP_MGNL_APP_BASE;
+  const currentLanguage = getCurrentLanguage(location.pathname);
+  let path = nodeName + location.pathname.replace(new RegExp('(.*' + nodeName + '|.html)', 'g'), ''); // remove .html
+
+  if (currentLanguage !== languages[0]) { // if not default
+    path = removeCurrentLanguage(path, currentLanguage);
+    path += '?lang=' + currentLanguage;
+  }
+
+  return path;
+}

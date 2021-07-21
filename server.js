@@ -7,7 +7,8 @@ const IlcSdk = require('ilc-sdk').default;
 const IlcAppSdk = require('ilc-sdk/app').default;
 const React = require('react');
 const ReactDOMServer = require('react-dom/server');
-const {default: App} = require('./build/server');
+const {default: App, loadPage, fetchNav } = require('./build/server');
+
 const PORT = 5000;
 
 const ilcSdk = new IlcSdk();
@@ -30,12 +31,16 @@ if (process.env.NODE_ENV === 'development') {
     server.use(express.static('build'));
 }
 
-server.get('*', (req, res) => {
+server.get('/fragment', async (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     const ilcReqData = ilcSdk.processRequest(req);
     const appSdk = new IlcAppSdk(ilcReqData);
 
-    const html = ReactDOMServer.renderToString(App(appSdk, ilcReqData.getCurrentReqOriginalUri()));
+    const location = new URL('http://localhost' + ilcReqData.getCurrentReqOriginalUri());
+    const pageJson = await loadPage(location);
+    const navJson = await fetchNav();
+
+    const html = ReactDOMServer.renderToString(App(appSdk, location, pageJson, navJson));
 
     res.send(`<div class="app-container">${html}</div>`);
 });

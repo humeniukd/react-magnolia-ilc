@@ -8,6 +8,16 @@ import {loadPage, loadTemplate} from "../api";
 class PageLoader extends React.Component {
   state = {};
 
+  constructor(props) {
+    super(props);
+    if (props.pageJson)
+      this.state = {
+        init: true,
+        content: props.pageJson,
+        pathname: props.location.pathname
+      }
+  }
+
   loadPage = async () => {
     // Bail out if already loaded content.
     if (this.state.pathname === this.props.location.pathname) return;
@@ -17,7 +27,7 @@ class PageLoader extends React.Component {
     const pageJson = await loadPage(this.props.location);
 
     const templateId = pageJson['mgnl:template'];
-    console.log('templateId:', templateId);
+    // console.log('templateId:', templateId);
 
     let templateJson = null;
     if (isInEditor) {
@@ -32,23 +42,15 @@ class PageLoader extends React.Component {
     });
   };
 
-
   inEditorPreview() {
     const url = this.props.location.href;
     const inPreview = url.indexOf('mgnlPreview=true') > 0;
-    console.log('inEditorPreview:' + inPreview);
+    // console.log('inEditorPreview:' + inPreview);
     return EditorContextHelper.inEditor() && inPreview;
   }
 
   componentDidMount() {
-    if (this.props.pageJson) {
-      this.setState({
-        init: true,
-        content: this.props.pageJson,
-        templateDefinitions: this.props.templateJson,
-        pathname: this.props.location.pathname,
-      });
-    } else this.loadPage();
+    this.loadPage();
   }
 
   componentDidUpdate() {
@@ -57,7 +59,6 @@ class PageLoader extends React.Component {
 
   render() {
     if (this.state.init) {
-      console.log('config:', config);
       //const isDevMode = NODE_ENV === 'development';
       //console.log("n:" + NODE_ENV)
 

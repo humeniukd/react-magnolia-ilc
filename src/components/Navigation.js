@@ -28,7 +28,7 @@ function Navigation({ items }) {
     if (navItems.length < 1) {
       fetchData();
     }
-  }, []);
+  }, [navItems]);
 
   return navItems ? (
     <nav className="Navigation">

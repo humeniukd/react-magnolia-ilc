@@ -42,7 +42,11 @@ server.get('/fragment', async (req, res) => {
 
     const html = ReactDOMServer.renderToString(App(appSdk, location, pageJson, navJson));
 
-    res.send(`<div class="app-container">${html}</div>`);
+    res.send(`<div class="app-container">${html}</div>
+    <script>
+        window.__pageJson__ = ${JSON.stringify(pageJson)}
+        window.__navJson__ = ${JSON.stringify(navJson)}
+    </script>`);
 });
 
 server.listen(PORT, () => {

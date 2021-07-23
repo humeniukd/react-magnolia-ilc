@@ -10,12 +10,13 @@ class PageLoader extends React.Component {
 
   constructor(props) {
     super(props);
-    if (props.pageJson)
+    if (props.pageJson) {
       this.state = {
         init: true,
         content: props.pageJson,
         pathname: props.location.pathname
       }
+    }
   }
 
   loadPage = async () => {
@@ -50,7 +51,8 @@ class PageLoader extends React.Component {
   }
 
   componentDidMount() {
-    this.loadPage();
+    if (!this.state.init)
+      this.loadPage();
   }
 
   componentDidUpdate() {
